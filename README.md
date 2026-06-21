@@ -69,7 +69,8 @@ Access the structural resources of this repository through the links below:
 
 ---
 - [View Workflow Architecture Blueprint](./Screenshot%20ai-image%20Generation%20agent%20workflow.png)
-- [Download Workflow JSON File (n8n Blueprint)](./ai_image_Generation_agent_workflow.json)
+- [Download Workflow JSON File (n8n Blueprint)](./ai_image_%20Generation_agent_workflow.json)
+-
 -
 ## ⚙️ Setup & Installation
 
