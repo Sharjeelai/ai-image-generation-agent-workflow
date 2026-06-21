@@ -1,0 +1,989 @@
+{
+  "name": "Auto image Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"nano-banana-pro\",\n  \"input\": {\n    \"prompt\": \"{{ $json.output.step_1_prompt }}\",\n    \"image_input\": [],\n    \"aspect_ratio\": \"1:1\",\n    \"resolution\": \"1K\",\n    \"output_format\": \"png\"\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        48
+      ],
+      "id": "7d9ec565-5f46-4a61-a1d4-02d06e871d1c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        48
+      ],
+      "id": "5275817d-70a0-46a7-836b-3ce201ec73da",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        48
+      ],
+      "id": "d0e8171e-97cb-41a1-8d15-547f57e4ea68",
+      "name": "Wait",
+      "webhookId": "ff872761-4b67-4f72-a6c7-92ee96ef798c"
+    },
+    {
+      "parameters": {
+        "formTitle": "welcome to Ai Image Generation",
+        "formDescription": "Sharjeel ai specialist Ai image generation !",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Writ Idea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -576,
+        256
+      ],
+      "id": "7808abf8-df64-4a92-9f2b-1dea34b10bf0",
+      "name": "On form submission",
+      "webhookId": "df6c6192-ffbb-410d-9b03-450b34bebc87"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Writ Idea'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": " Act as an AI image prompt generator. Take the user's single input and create exactly 3 sequential, related image prompts (Step 1, Step 2, and Step 3) that show a clear progression or story of that topic. Keep the visual style and mood exactly the same across all three prompts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -368,
+        256
+      ],
+      "id": "e9dedf67-1176-425d-b9ee-e63d5a516de5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -432,
+        416
+      ],
+      "id": "52e44de1-9b0a-4caf-a3b5-c600444dcaf7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Qb4ZAhYf3GP7FkKe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "={\n  \"type\": \"object\",\n  \"properties\": {\n    \"step_1_prompt\": {\n      \"type\": \"string\"\n    },\n    \"step_2_prompt\": {\n      \"type\": \"string\"\n    },\n    \"step_3_prompt\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\"step_1_prompt\", \"step_2_prompt\", \"step_3_prompt\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        416
+      ],
+      "id": "9f96bd16-7dfc-4ee4-a2f7-9f6e2daed01f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ab529bce-2f37-419d-8929-fe4fa1f85beb",
+              "leftValue": "={{ $json.msg }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "432b2be0-5161-4009-972e-567b44d250cd",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        928,
+        48
+      ],
+      "id": "9d494e40-c999-4825-a41f-42fb7f78a870",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. پچھلے نوڈ سے آنے والا سارا ڈیٹا حاصل کریں\nlet inputData = items[0].json;\n\n// 2. چیک کریں کہ کیا ڈیٹا کے اندر 'resultJson' موجود ہے\nif (inputData.data && inputData.data.resultJson) {\n  \n  // اگر 'resultJson' ایک سٹرنگ (String) ہے تو اسے آبجیکٹ میں تبدیل کریں\n  let resultObj = typeof inputData.data.resultJson === 'string' \n    ? JSON.parse(inputData.data.resultJson) \n    : inputData.data.resultJson;\n\n  // 3. لسٹ [ ] میں سے پہلا لنک نکالیں اور بریکٹس ختم کریں\n  if (resultObj.resultUrls && resultObj.resultUrls.length > 0) {\n    inputData.data.resultJson = resultObj.resultUrls[0]; \n  }\n}\n\n// 4. سارا ڈیٹا (تبدیلی کے ساتھ) اگلا نوڈ پر بھیجیں\nreturn [{ json: inputData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        48
+      ],
+      "id": "0fc5efba-4000-4b71-90d5-4d6477463d18",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"nano-banana-pro\",\n  \"input\": {\n    \"prompt\": \"{{ $json.output.step_2_prompt }}\",\n    \"image_input\": [],\n    \"aspect_ratio\": \"1:1\",\n    \"resolution\": \"1K\",\n    \"output_format\": \"png\"\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        256
+      ],
+      "id": "cc1a6931-84f5-4a66-92e1-c75af36132cc",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        256
+      ],
+      "id": "42ef62b7-1fce-484a-aff0-1f0ae3afec1a",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        256
+      ],
+      "id": "a6f9325f-ba73-4253-88f6-75c98722bf75",
+      "name": "Wait1",
+      "webhookId": "ff872761-4b67-4f72-a6c7-92ee96ef798c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ab529bce-2f37-419d-8929-fe4fa1f85beb",
+              "leftValue": "={{ $json.msg }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        928,
+        256
+      ],
+      "id": "4c1f5e2d-17c5-4831-aa83-3aa89687a15d",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. پچھلے نوڈ سے آنے والا سارا ڈیٹا حاصل کریں\nlet inputData = items[0].json;\n\n// 2. چیک کریں کہ کیا ڈیٹا کے اندر 'resultJson' موجود ہے\nif (inputData.data && inputData.data.resultJson) {\n  \n  // اگر 'resultJson' ایک سٹرنگ (String) ہے تو اسے آبجیکٹ میں تبدیل کریں\n  let resultObj = typeof inputData.data.resultJson === 'string' \n    ? JSON.parse(inputData.data.resultJson) \n    : inputData.data.resultJson;\n\n  // 3. لسٹ [ ] میں سے پہلا لنک نکالیں اور بریکٹس ختم کریں\n  if (resultObj.resultUrls && resultObj.resultUrls.length > 0) {\n    inputData.data.resultJson = resultObj.resultUrls[0]; \n  }\n}\n\n// 4. سارا ڈیٹا (تبدیلی کے ساتھ) اگلا نوڈ پر بھیجیں\nreturn [{ json: inputData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        256
+      ],
+      "id": "616fc3d7-4cb1-4ff9-bb10-a029752fd992",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"nano-banana-pro\",\n  \"input\": {\n    \"prompt\": \"{{ $json.output.step_3_prompt }}\",\n    \"image_input\": [],\n    \"aspect_ratio\": \"1:1\",\n    \"resolution\": \"1K\",\n    \"output_format\": \"png\"\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        480
+      ],
+      "id": "a98a79de-6faa-4b37-add8-f16f170c6322",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 80795a1d27839edab358544460f5f5bc"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        480
+      ],
+      "id": "54ee81e6-027c-45f1-8662-275e6ef49127",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        480
+      ],
+      "id": "4ab0b1f6-80ae-4c31-b596-4d874a8e63af",
+      "name": "Wait2",
+      "webhookId": "ff872761-4b67-4f72-a6c7-92ee96ef798c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ab529bce-2f37-419d-8929-fe4fa1f85beb",
+              "leftValue": "={{ $json.msg }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        480
+      ],
+      "id": "489d4d04-7017-4c21-adcf-9cfdc71f0195",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. پچھلے نوڈ سے آنے والا سارا ڈیٹا حاصل کریں\nlet inputData = items[0].json;\n\n// 2. چیک کریں کہ کیا ڈیٹا کے اندر 'resultJson' موجود ہے\nif (inputData.data && inputData.data.resultJson) {\n  \n  // اگر 'resultJson' ایک سٹرنگ (String) ہے تو اسے آبجیکٹ میں تبدیل کریں\n  let resultObj = typeof inputData.data.resultJson === 'string' \n    ? JSON.parse(inputData.data.resultJson) \n    : inputData.data.resultJson;\n\n  // 3. لسٹ [ ] میں سے پہلا لنک نکالیں اور بریکٹس ختم کریں\n  if (resultObj.resultUrls && resultObj.resultUrls.length > 0) {\n    inputData.data.resultJson = resultObj.resultUrls[0]; \n  }\n}\n\n// 4. سارا ڈیٹا (تبدیلی کے ساتھ) اگلا نوڈ پر بھیجیں\nreturn [{ json: inputData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        480
+      ],
+      "id": "5aaae061-cf8c-49f6-ab71-2310431201a2",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        272
+      ],
+      "id": "27784cef-9eb9-434e-af22-df7179e16108",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        144
+      ],
+      "id": "e60ac41e-6f7b-4f54-995c-869b7db92e17",
+      "name": "Stop"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU",
+          "mode": "list",
+          "cachedResultName": "Auto image Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image-1 URL": "={{ $json.data.resultJson }}",
+            "Image-2 URL": "=",
+            "Image-3 URL": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Image-1 URL",
+              "displayName": "Image-1 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-2 URL",
+              "displayName": "Image-2 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-3 URL",
+              "displayName": "Image-3 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1152,
+        32
+      ],
+      "id": "614c5ef1-7361-4791-a18a-470f163fe11b",
+      "name": "Save Image 1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vnfg4FKLS870Ajqz",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU",
+          "mode": "list",
+          "cachedResultName": "Auto image Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image-2 URL": "={{ $json.data.resultJson }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Image-1 URL",
+              "displayName": "Image-1 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-2 URL",
+              "displayName": "Image-2 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-3 URL",
+              "displayName": "Image-3 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1152,
+        240
+      ],
+      "id": "7612dcb8-913e-46ad-a531-57c927478037",
+      "name": "Save Image 2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vnfg4FKLS870Ajqz",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU",
+          "mode": "list",
+          "cachedResultName": "Auto image Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hPrvlh-EAY815-nzhaeeHW_fBPgFBq6tduUMtoy2fxU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Image-3 URL": "={{ $json.data.resultJson }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Image-1 URL",
+              "displayName": "Image-1 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-2 URL",
+              "displayName": "Image-2 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image-3 URL",
+              "displayName": "Image-3 URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1152,
+        464
+      ],
+      "id": "4dc8b094-fe5c-4a01-ac83-e6073641ac12",
+      "name": "Save Image 3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vnfg4FKLS870Ajqz",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Save Image 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Save Image 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Save Image 3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Stop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image 1": {
+      "main": [
+        []
+      ]
+    },
+    "Save Image 3": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a6c56cbc-a21f-4191-865b-3c40ac0f4397",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caaee41ca68e14fac94290ca161cce19a1f38019e7ee14ba90c71a535488b335"
+  },
+  "id": "vQhDn7IMPnTqYcKk",
+  "tags": []
+}
